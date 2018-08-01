@@ -1,0 +1,314 @@
+---
+title: "APEXSENSUN quick start manual"
+author: "Mansour Talebizadeh"
+date: "`r Sys.Date()`"
+output: github_document
+vignette: >
+  %\VignetteIndexEntry{APEXSENSUN quick start manual}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+## Introduction
+APEXSENSUN is a package in R for performing uncertainty and sensitivity analysis (SA) for the APEX model.The package was primarily developed for [USDA-ARS Grazinglands Research Laboratory](https://www.ars.usda.gov/plains-area/el-reno-ok/grazinglands-research-laboratory/) to assist in parametrization of the APEX model. For more information on the structure of APEXSENSUN and citation, please refer to:</br>
+[Paper](https://www.sciencedirect.com/science/article/pii/S0378377418309260)
+
+## Example folder
+
+An example folder containing an APEX project and other inputs is available for users to test the package. The rest of this manual provides details of implementing an SA project using the accompanying example folder which can be created through a call to:
+```{r, eval=FALSE}
+# Loading APEXSENSUN package in R:
+  library(APEXSENSUN)
+  
+# Creating a copy of tutorial folder inside the working directory
+  getExampleFolder()
+```
+
+## Steps for performing SA
+After loading APEXSENSUN and generating a copy of the example folder, the following four steps, described in the next sections should be followed for performing SA.
+```{r, eval=FALSE}
+# 1) Generating a list object with a predefined structure compatible to APEXSENSUN:
+     globalInput <- APEXSENSUN::inputGen()
+
+# 2) Setting the required inputs (e.g. uncertainty boubds, SA method, sample size, ...)
+  #
+  # Setting uncertainty bounds:
+    globalInput$apexPARM$Root_growth_soil[1] = 0.15
+    globalInput$apexPARM$Root_growth_soil[2] = 0.2
+  
+    globalInput$apexPARM$Soil_water_limit[1] = 0
+    globalInput$apexPARM$Soil_water_limit[2] = 1
+  
+    globalInput$apexPARM$Soil_evap_coeff[1] = 1.5
+    globalInput$apexPARM$Soil_evap_coeff[2] = 2.5
+  
+    globalInput$apexPARM$Soil_evap_plant_cover[1] = 0
+    globalInput$apexPARM$Soil_evap_plant_cover[2] = 0.5
+  
+    globalInput$apexPARM$Runoff_CN_int_abs[1] = 0.05
+    globalInput$apexPARM$Runoff_CN_int_abs[2] = 0.4
+  
+    globalInput$apexPARM$Max_rain_intercept[1] = 0
+    globalInput$apexPARM$Max_rain_intercept[2] = 15
+  
+    globalInput$apexPARM$Rain_intercept_coeff[1] = 0.05
+    globalInput$apexPARM$Rain_intercept_coeff[2] = 0.3
+  
+    globalInput$apexPARM$Microbial_top_soil_coeff[1] = 0.1
+    globalInput$apexPARM$Microbial_top_soil_coeff[2] = 1
+  
+    globalInput$apexPARM$Microbial_decay_coeff[1] = 0.5
+    globalInput$apexPARM$Microbial_decay_coeff[2] = 1.5
+  
+  # SA method and sample size:
+    globalInput$gsaType <- "SRC"
+    globalInput$sampleSize <- 1000
+
+# 3) Performing Monte Carlo simulation using the setting in globalInput:
+     input4SA <- mc4APEX(globalInput)
+    
+# 4) Calculation of sensitivity indices:
+     sa4APEX(globalInput,input4SA = input4SA)
+```
+
+## Postprocessing and model calibration
+APEXSENSUN can be used for computing performance matrix containing the performance of different Monte Carlo runs.  The calculated performance matrix can be subsequently used for identifying simulations that meet a set of criteria.
+```{r, eval=FALSE}
+# Calculation of performance matrix (containing RMSE, NASH, PBIAS, MEAN) for different Monte Carlo runs:
+    perfMat <- APEXSENSUN::dws2perf(observedFilePath ="Example/Observed_Files/observed.txt",
+                      dwsFolderPath = "Example/Calculated_Outputs/DWS",
+                      startDate="2002-01-01", endDate="2003-01-01",
+                      captionDwsVar="ET", captionObsVar="ET",TW="week")
+
+# Detecting simulation numbers meeting performance criteria:
+    acceptedSimulations <- perf2idx(perfMatrix = perfMat,
+                                  lowLimit = c(0, -25, 10, 0),  
+                                  upLimit = c(10, 100, 25, 5))  
+```
+## APENDIX
+This section provides 4 main tables containing the name of different parameters and their description.
+
+ 
+```{r kable, echo=FALSE, results= "asis"}
+genInputsNames <- setdiff(x = names(APEXSENSUN::inputGen()),
+                         y = c("saParms", "apexPARM", "apexCONT")) 
+genInputsDesc <- c("Sample size or length of the discretization of parameter space.",
+  "Simulated variable name as it appears inside .DWS APEX file.",
+  "Observed variable names as appears inside observed file.",
+  "Start date for analysis with format: YYYY MM DD e.g., 2002 01 01",
+  "End date for analysis with format: YYYY MM DD e.g., 2003 01 01",
+  "APEX executable file name excluding file's extension.",
+  "APEX PARM file name excluding file's extension.",
+  "APEXCONT file name excluding file's extension.",
+  "APEX .AWP file name excluding file's extension.",
+  "APEX .ACY file name excluding file's extension.", 
+  "APEX .DWS file name excluding file's extension.", 
+  "Observed file name containing observed time series.", 
+  "Path to original APEX file containing PARM parameters.", 
+  "Path to original APEX file containing APEXCONT parameters.",
+  "Path to folder containing APEX model.",
+  "No need to set!",
+  "Path to folder containing observed data file.", 
+  "Path to folder storing SA results.", 
+  "Path to folder storing generated PARM files for Monte Carlo runs.", 
+  "Path to folder storing generated APEXCONT file for Monte Carlo runs.",
+  "Path to folder storing calculated .AWP files for Monte Carlo runs.", 
+  "Path to folder storing calculated .ACY files for Monte Carlo runs.",
+  "Path to folder storing calculated .DWS files for Monte Carlo runs.",
+  "Type of SA method: MORRIS, SRC, SRRC, SOBOL, SOBOL2002, SOBOL2007, SOBOLEFF, SOBOLJANSEN, SOBOLMARA, SOBOLMARTINEZ, FAST99, KSTEST."
+   ) 
+genTable <- data.frame(Parameters = genInputsNames,
+                       Description = genInputsDesc)
+#print(genTable)
+knitr::kable(x = genTable, caption = "Table 1. General inputs")
+```
+
+
+
+
+
+</br>
+```{r, echo=FALSE, results="asis"}
+saInputsNames <- names(APEXSENSUN::inputGen()$saParms)
+saInputsDesc <- c("an integer representing design repetition number (i.e. the number of elementary effect computed per factor).",
+                  "an integer specifying the number of levels of the design in OAT (Once At a Time) design.",
+                  "an integer representing maximum order in the ANOVA decomposition in Sobol method.",
+                  "A performance function type for KSTEST method. Available options are: NASH, RMSE, PBIAS",
+                  "Threshold value for performance function for determining behavioral from non-behavioral simulations.",
+                  "Significance level used in KSTEST")
+saTable <- data.frame(Parameters = saInputsNames,
+                       Description = saInputsDesc)
+knitr::kable(x = saTable, caption = "Table 2. SA-specific parameters")
+```
+
+
+
+
+</br>
+```{r, echo=FALSE, results= "asis"}
+apexParms <- names(APEXSENSUN::inputGen()$apexPARM)
+apexParmsDesc <- c("Crop canopy-PET",
+  "Root growth-soil strength",
+  "Water stress-harvest index",
+  "Water storage N leaching",
+  "Soil water lower limit",
+  "Winter dormancy",
+  "N fixation",
+  "Soluble phosphorus runoff coefficient",
+  "Pest damage moisture threshold",
+  "Pest damage cover threshold",
+  "Moisture required for seed germination",
+  "Soil evaporation coefficient",
+  "Wind erodibility coefficient",
+  "Nitrate leaching ratio",
+  "Runoff CN Residue Adjustment Parameter",
+  "Expands CN retention parameter",
+  "Soil evaporation – plant cover factor",
+  "Sediment routing exponent",
+  "Sediment routing coefficient",
+  "Runoff curve number initial abstraction",
+  "Soluble Carbon adsorption Coefficient",
+  "Reduces NRCS Runoff CN Retention Parameter for Frozen Soil",
+  "Hargreaves PET equation coefficient",
+  "Pesticide leaching ratio",
+  "Exponential coefficient used to account for rainfall intensity on curve number",
+  "Fraction of maturity at spring growth initiation",
+  "CEC effect on nitrification & volatilization",
+  "Upper Nitrogen Fixation limit",
+  "Biological mixing efficiency",
+  "Soluble phosphorus runoff exponent",
+  "Maximum depth for biological mixing",
+  "Organic P loss exponent",
+  "Coefficient in MUST EQ",
+  "Hargreaves PET equation exponent",
+  "Denitrification soil-water threshold",
+  "Upper Limit of Daily Denitrification rate",
+  "Exponent in Delivery Ratio for SWAT Output",
+  "Water stress weighting coefficient",
+  "Puddling Saturated conductivity",
+  "Groundwater storage threshold",
+  "Plant root temperature stress exponent",
+  "SCS curve number index coefficient",
+  "Plow layer depth",
+  "Upper Limit of Curve Number Retention Parameter",
+  "Sediment routing travel time coefficient",
+  "RUSLE C-factor coefficient",
+  "RUSLE C-factor coefficient",
+  "Adjusts climatic stress factor",
+  "Maximum rainfall interception by plant canopy",
+  "Rainfall interception coefficient",
+  "Water stored in litter (residue) coefficient",
+  "Exponential coefficient in EQUATION expressing tillage effect on residue decay rate",
+  "Coefficient in oxygen EQUATION used in modifying microbial activity with soil depth",
+  "N enrichment ratio coefficient for routing",
+  "N enrichment ratio exponent for routing",
+  "Fraction destroyed by burn operation",
+  "P enrichment ratio coefficient for routing",
+  "P enrichment ratio exponent for routing",
+  "P upward movement by evaporation coefficient",
+  "Maximum number of days a pasture is grazed before rotation",
+  "Soil water Upward Flow Limit",
+  "Manure erosion equation coefficient",
+  "N Enrichment Ratio for Delivery to SWAT",
+  "Dust distribution coefficient",
+  "RUSLE2 transport capacity parameter",
+  "RUSLE2 threshold transport capacity coefficient",
+  "Dust distribution dispersion exponent",
+  "Manure erosion exponent",
+  "Coefficient adjusts microbial activity function in the top soil layer",
+  "Microbial decay rate coefficient",
+  "Manure erosion coefficient",
+  "Volatilization/nitrification partitioning coefficient",
+  "Hydrograph development parameter",
+  "Partitions Nitrogen flow from groundwater",
+  "P Enrichment Ratio for Delivery to SWAT",
+  "Standing Dead fall rate coefficient",
+  "Runoff amount to delay pest application",
+  "Soil water value to delay tillage",
+  "Auto mow lower limit",
+  "Upper Limit of Nitrification-Volatilization",
+  "Technology Coefficient",
+  "Estimates drainage system lateral hydraulic conductivity",
+  "Coefficient regulating P flux between labile and active pool",
+  "Coefficient regulating P flux between active and stable pool",
+  "Nitrogen and Salt Upward movement by evaporation coefficient",
+  "Water table recession coefficient",
+  "Limits daily water table movement",
+  "Water table recession",
+  "Subsurface flow factor",
+  "Flood Evaporation Limit",
+  "Runoff Volume Adjustment for Direct Link",
+  "Water Erosion Threshold",
+  "Wind Erosion Threshold",
+  "Exponent of Crop Stress Temperature function",
+  "Soluble Phosphorus Leaching KD value",
+  "---",
+  "---",
+  "---",
+  "Cost of Irrigation Water",
+  "Cost of Lime",
+  "Cost of Fuel",
+  "Cost of Labor",
+  "---")
+
+myTable <- data.frame(Parameters=apexParms, Description=apexParmsDesc)
+knitr::kable(x = myTable,
+             caption = "Table 3. APEX model parameters located inside PARM****.dat file")
+
+
+```
+
+
+
+
+</br>
+```{r, echo=FALSE, results='asis'}
+contParmNames <- names(APEXSENSUN::inputGen()$apexCONT)
+contParmDesc <- c("Average concentration of nitrogen in rainfall",
+  "Carbon dioxide concentration in atmosphere",
+  "Concentration of NO3-N in irrigation water in ppm",
+  "Pest damage scaling factor",
+  "Number years of maximum monthly 0.5 hour rainfall available",
+  "COEF (0-1) governing wet-dry probabilities given days of rain",
+  "Parameter used to modify exponential rainfall amount distribution",
+  "Channel Capacity Flow Rate",
+  "Exponent in watershed area flow rate equation",
+  "Average upland slope (m/m) in watershed",
+  "Channel bottom width/depth in m/m; Channel flow rate (QG) > 0",
+  "Floodplain width/channel width in m/m",
+  "Floodplain saturated hydraulic conductivity in mm/h",
+  "Maximum ground water storage in mm",
+  "Ground water residence time in days",
+  "Return Flow / (Return Flow + Deep Percolation)",
+  "Saturated Conductivity adjustment factor",
+  "Field length (if wind erosion is to be considered) in kilometers",
+  "Field width (if wind erosion is to be considered) in kilometers",
+  "Clockwise angle of field length from north (if wind erosion is to be considered)",
+  "Power Parameter of Modified Exponential Distribution of Wind Speed (if wind erosion is to be considered)",
+  "Soil Particle Diameter(if wind erosion is to be considered)",
+  "Wind Erosion Adjustment Factor",
+  "Grazing limit",
+  "Number of years of cultivation at start of simulation",
+  "Linear coefficient of change in rainfall from east to west (PI/PO/KM)",
+  "Linear coefficient of change in rainfall from south to north (PI/PO/KM)",
+  "Time interval for flood routing (hours)",
+  "Routing Threshold (mm) – VSC routing used when QVOL>QTH",
+  "VSC Routing used when reach storage > STND",
+  "Equation for Water Erosion",
+  "Fraction of subareas controlled by ponds",
+  "USLE Crop Management Channel Factor",
+  "Salt Concentration in Irrigation Water",
+  "Exponents of MUSI equation",
+  "Exponents of MUSI equation",
+  "Exponents of MUSI equation")
+
+conParmTable <- data.frame(Parameters = contParmNames,
+                           Description = contParmDesc)
+knitr::kable(x = conParmTable, caption = "Table 4. APEX control parameters located inside APEXCONT.dat file")
+
+```
+
+
+
+
+
+

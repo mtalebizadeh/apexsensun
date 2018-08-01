@@ -1,0 +1,16 @@
+Package: APEXSENSUN
+Type: Package
+Title: Uncertainty and Sensitivity Analysis for Agricultural Policy/Environmental eXtender Model (APEX)
+Version: 1.7.7
+Author: Mansour Talebizadeh  
+Maintainer: Mansour Talebizadeh <mansour.talebizadeh@gmail.com>
+Description: Performs Uncertainty and sensitivity analysis for the APEX model.
+License: GPL-3
+LazyData: TRUE
+Imports:
+    sensitivity
+Depends: R (>= 3.0.0)
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

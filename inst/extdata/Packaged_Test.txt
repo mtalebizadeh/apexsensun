@@ -1,0 +1,93 @@
+
+
+
+############################################################################# Author: Mansour Talebizadeh #############################################################################
+#
+#Description: Input file for running APEXSENSUN tools for uncertainty and uncertainty analysis of the APEX model
+#NOTE: Please respect the format and do not change line numbers designated to each variable.
+#######################################################################################################################################################################################
+
+#Sample Size or Length of the desrtizitation of parameter space:
+	100
+
+###############################
+
+#Simulated variable names as they appear in .DWS File. (NOTE: For Total Nitrogen "TN" and For Total phosphorus "TP". Separate variables using space):
+	"ET"
+#Observed variable names as they appear in observed file. (NOTE: Must follow the same numbrer and ordering as the "Simulated Variable Names"  in Line 6):
+	"ET"
+
+###############################
+
+#Start Date: (Note: The format should be like this: "YYYY MM DD". Note: Must have the same length and order as "Simulated Variable Names" in Line6):
+	"2002 01 01"
+#End Date: (Must have the same length and order as "Simulated Variable Names" in Line6):
+	"2003 01 01"
+
+###############################
+
+#Executable file name EXCLUIDING file's extension:
+	"APEX0806"
+#APEX PARM file name EXCLUIDING file's extension:
+	"PARM"
+#APEX Control file EXCLUIDING file's extension:
+	"Apexcont"
+#APEX .AWP output file name EXCLUIDING file's extension:
+	"APEX001"
+#APEX .ACY output file name EXCLUIDING file's extension:
+	"APEX001"
+#APEX .DWS output file name EXCLUIDING file's extension:
+	"APEX001"
+#An arbitrary .txt file name INCLUIDING file's extension (i.e. .txt),. This file stores sampled parameter values:
+	"X_mat.txt"
+#Observed file name containing observed time series
+	"Observed.txt"
+
+###############################
+
+#Template file path storing APEX PARM parameter's ranges
+	"parm_template_file.txt"
+#Template file path storing APEX Control parameter's ranges
+	"cont_template_file.txt"
+#File path representing original APEX PARM file generating after building APEX model (i.e. PARM backup file)
+	"Example/Back_Up/PARM.dat"
+#File path representing original APEX Control file generating after building APEX model (i.e. APEXCONT backup file)
+	"Example/Back_Up/Apexcont.dat"
+#Folder path containing APEX model
+	"Example/APEX"
+#Folder path of the working directory (i.e. where you put the input and range files):
+	""
+#Folder path containing observed text file:
+	"Example/Observed_Files"
+#Folder path for storing sensitivity analysis (GSA) results:
+	"Example/GSA_Outputs"
+#Folder path for storing generated APEX PARM files
+	"Example/Generated_Inputs/PARM"
+#Folder path for storing generated APEX Control files
+	"Example/Generated_Inputs/CONT"
+#Folder path for storing calculated .AWP files
+	"Example/Calculated_Outputs/AWP"
+#Folder path for storing calculated .ACY files
+	"Example/Calculated_Outputs/ACY"
+#Folder path for storing calculated .DWS files
+	"Example/Calculated_Outputs/DWS"
+#Type of Sensitivity analysis:
+	"SRC"
+###############################################################################---SA method-specific parameters---#############################################################################
+#Morris
+	#r, an integer representing design repetition number (i.e. the number of elementary effect computed per factor)
+	15
+	#levels, an integer specifying the number of levels of the design in OAT (Once At a Time) design
+	8
+#Sobol
+	#order, an integer representing maximum order in the ANOVA decomposition
+	1
+#Ks-Test
+	#performance function type
+	"NASH"
+	#Threshold value for performance function for determining behavioral from non-behavioral simulations
+	0.2
+	#Significance level
+	0.05
+
+
