@@ -1,2 +1,2 @@
 # apexsensun
-APEXSENSUN performs global sensitivity analysis and assists with calibration of the APEX model.  
+APEXSENSUN is a package in R for performing uncertainty and sensitivity analysis (SA) for the APEX model.The package was primarily developed for [USDA-ARS Grazinglands Research Laboratory](https://www.ars.usda.gov/plains-area/el-reno-ok/grazinglands-research-laboratory/) to assist in parametrization of the APEX model. For more information on the structure of APEXSENSUN and citation, please refer to:</br> [Paper](https://www.sciencedirect.com/science/article/pii/S0378377418309260) 
