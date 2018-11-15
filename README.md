@@ -1,7 +1,6 @@
 APEXSENSUN quick start manual
 ================
-Mansour Talebizadeh
-2018-08-01
+
 
 Introduction
 ------------
